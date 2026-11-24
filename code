@@ -1,82 +1,159 @@
 import turtle as t
+import random
  
-tree1 = [[(100,250) , (80,200) , (120,200) , (100,200)],]
-ground = [ ( -400 , -100 ) , ( 400, -100 ) , ( 400 , -300 ) , ( -400 , -300 ) ]
+mouse_x = 0
+mouse_y = 0
  
-def draw_fillcolor_ground() :
-    pen1.penup()
-    pen1.goto(ground[0])      
-    pen1.pendown()
-    pen1.fillcolor("#89c3eb")
-    pen1.begin_fill()
+is_pressing = False
  
-    pen1.goto(ground[1])
-    pen1.goto(ground[2])
-    pen1.goto(ground[3])
-    pen1.goto(ground[0])  
-    pen1.end_fill()       
- 
-def draw_gift_box():
-   
-    pen2.penup()
-    pen2.pensize(1)
-   
- 
-   
-    pen2.goto(180, -100)  
-    pen2.pendown()
-    pen2.color("black", "red")  
-    pen2.begin_fill()
-    for _ in range(2):
-        pen2.forward(80)  
-        pen2.left(90)
-        pen2.forward(80)  
-        pen2.left(90)
-    pen2.end_fill()
-   
-   
-    pen2.penup()
-    pen2.goto(210, -100)
-    pen2.pendown()
-    pen2.color("black", "yellow")
-    pen2.begin_fill()
-    for _ in range(2):
-        pen2.forward(20)
-        pen2.left(90)
-        pen2.forward(80)  
-        pen2.left(90)
-    pen2.end_fill()
- 
-   
-    pen2.penup()
-    pen2.goto(180, -70)  
-    pen2.pendown()
-    pen2.color("black", "yellow")
-    pen2.begin_fill()
-    for _ in range(2):
-        pen2.forward(80)
-        pen2.left(90)
-        pen2.forward(20)
-        pen2.left(90)
-    pen2.end_fill()
- 
+snowflakes = []
  
 screen = t.Screen()
 screen.setup(800, 600)
-screen.bgcolor("black")
+screen.bgcolor("#0A295B")
+screen.tracer(0)
  
 pen1 = t.Turtle()
 pen2 = t.Turtle()
+pen_tree = t.Turtle()
+ 
 pen1.speed(0)
 pen1.hideturtle()
 pen2.speed(0)
 pen2.hideturtle()
+pen_tree.speed(0)
+pen_tree.hideturtle()
  
 pen1.color("green")
 pen2.color("white")
+pen_tree.color("green")
+ 
+ 
+tree1 = [ (-2,286) , (-55,201) ,(-27,201) , (-71,136) , (-36,138),(-88,68) ,
+          (85,68) , (31,136) , (69,138) , ( 34,198 ), (58,199),(-3,286) ]
+ 
+ground = [(-400, -100), (400, -100), (400, -300), (-400, -300)]
+ 
+ 
+gift = [
+    ([(155, -100), (275, -100), (275, 20), (155, 20)], "red"),
+    ([(200, -100), (230, -100), (230, 20), (200, 20)], "yellow"),
+    ([(155, -55), (275, -55), (275, -25), (155, -25)], "yellow"),
+]
+ 
+ 
+ 
+screen.cv.bind("<ButtonPress-1>", lambda e: on_press(e.x - 400, 300 - e.y))
+screen.cv.bind("<ButtonRelease-1>", lambda e: on_release(e.x - 400, 300 - e.y))
+screen.cv.bind("<Motion>", lambda e: on_move(e.x - 400, 300 - e.y))
+screen.cv.bind("<Leave>", lambda e: on_leave(0, 0))
+ 
+ 
+def draw_fillcolor_ground():
+    pen1.penup()
+    pen1.goto(ground[0])
+    pen1.pendown()
+    pen1.fillcolor("#a9d3ef")
+    pen1.begin_fill()
+    pen1.goto(ground[1])
+    pen1.goto(ground[2])
+    pen1.goto(ground[3])
+    pen1.goto(ground[0])
+    pen1.end_fill()
+ 
+def draw_gift_box():
+    pen2.pensize(1)
+    pen2.color("black")
+    for points, color in gift:
+        pen2.penup()
+        pen2.goto(points[0])
+        pen2.pendown()
+        pen2.fillcolor(color)
+        pen2.begin_fill()
+        for p in points[1:]:
+            pen2.goto(p)
+        pen2.goto(points[0])
+        pen2.end_fill()
+ 
+def draw_tree() :
+    pen_tree.penup
+    pen_tree.goto(tree1[ 0 ])
+    pen_tree.pendown()
+    pen_tree.fillcolor("#11835b")
+    pen_tree.begin_fill()
+    for i in range ( 12 ) :
+        pen_tree.goto(tree1[i])
+   
+    pen_tree.goto(tree1[ 0 ])
+    pen_tree.end_fill()  
+ 
+     
+ 
+ 
+ 
+def on_press(x, y):
+    global is_pressing, mouse_x, mouse_y
+    is_pressing = True
+    mouse_x = x
+    mouse_y = y
+ 
+def on_release(x, y):
+    global is_pressing
+    is_pressing = False
+ 
+def on_move(x, y):
+    global mouse_x, mouse_y
+    mouse_x = x
+    mouse_y = y
+ 
+def on_leave(x, y):
+    global is_pressing
+    is_pressing = False
+ 
+def create_snowflake():
+    s = t.Turtle()
+    s.hideturtle()
+    s.speed(0)
+    s.penup()
+    s.shape("circle")
+    s.shapesize(0.3)
+    s.color("white", "white")
+   
+    spawn_x = mouse_x + random.randint(-20, 20)
+    spawn_y = mouse_y + random.randint(-10, 10)
+    s.goto(spawn_x, spawn_y)
+    s.showturtle()
+   
+    speed = random.uniform(2, 6)
+    snowflakes.append([s, speed])
+ 
+def update_snow():
+    global is_pressing
+   
+    if is_pressing:
+        for _ in range(3):
+            create_snowflake()
+           
+    for flake in snowflakes[:]:
+        turtle_obj = flake[0]
+        speed = flake[1]
+       
+        turtle_obj.sety(turtle_obj.ycor() - speed * 2)
+       
+        if turtle_obj.ycor() <= -100:
+            turtle_obj.clear()
+            turtle_obj.hideturtle()
+            flake.clear()
+            snowflakes.remove(flake)
+           
+    screen.update()
+    screen.ontimer(update_snow, 20)
+ 
  
 draw_fillcolor_ground()
 draw_gift_box()
+draw_tree()
+update_snow()
  
 t.done()
  
